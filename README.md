@@ -15,13 +15,13 @@ go run main.go
 ## Progress
 
 <!-- AOC PROGRESS START -->
-🎄 **2024 Progress:** 3/50 (6%)
+🎄 **2024 Progress:** 2/25 stars (8%)
 
 | Day | Results | Stars |
 |:---:|:-------:|:-----:|
-| [Day 1](aoc24/day1) | P1: 1319616, P2: 27267728 | ⭐⭐ |
-| [Day 2](aoc24/day2) | P1: 421 | ⭐ |
-| [Day 3](aoc24/day3) | | |
+| [Day 1](aoc24/day1) | P1: 1319616 , P2: 27267728 |  ⭐ |
+| [Day 2](aoc24/day2) | P1: 421 , P2: 476 |  ⭐ |
+| [Day 3](aoc24/day3) | P1: 160672468 |  |
 | [Day 4](aoc24/day4) | | |
 | [Day 5](aoc24/day5) | | |
 | [Day 6](aoc24/day6) | | |
