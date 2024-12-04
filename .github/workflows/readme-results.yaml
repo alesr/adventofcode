@@ -1,0 +1,81 @@
+name: readme-results
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-solutions:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          
+      - name: Run solutions
+        run: |
+          # Run the solutions
+          output=$(go run main.go)
+          stars=$(echo "$output" | grep "STARS=" | cut -d'=' -f2)
+          echo "AOC_RESULT=$stars" >> $GITHUB_ENV
+          
+          # Store all results
+          echo "RESULTS<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          
+      - name: Update README progress
+        run: |
+          progress=$(cat README.md)
+          stars=${{ env.AOC_RESULT }}
+          
+          # Extract results
+          readarray -t results < <(echo "${{ env.RESULTS }}" | grep "DAY")
+          
+          # Create new progress table with results
+          new_table="| Day | Results | Stars |\n|:---:|:-------:|:-----:|\n"
+          current_day=1
+          i=0
+          while [ $i -lt ${#results[@]} ]; do
+            p1=$(echo "${results[$i]}" | grep "DAY.*P1" | cut -d'=' -f2)
+            p2=$(echo "${results[$((i+1))]}" | grep "DAY.*P2" | cut -d'=' -f2)
+            
+            result_text=""
+            star=""
+            
+            if [ -n "$p1" ] && [ -n "$p2" ]; then
+              result_text="P1: $p1 , P2: $p2"
+              star=" ⭐"
+            elif [ -n "$p1" ]; then
+              result_text="P1: $p1"
+            fi
+            
+            new_table+="| [Day $current_day](aoc24/day$current_day) | $result_text | $star |\n"
+            ((current_day++))
+            ((i+=2))
+          done
+          
+          # Fill remaining days
+          while [ $current_day -le 25 ]; do
+            new_table+="| [Day $current_day](aoc24/day$current_day) | | |\n"
+            ((current_day++))
+          done
+          
+          # Replace the progress section in README
+          sed -i "/<!-- AOC PROGRESS START -->/,/<!-- AOC PROGRESS END -->/c\<!-- AOC PROGRESS START -->\n🎄 **2024 Progress:** $stars/25 stars ($(($stars * 4))%)\n\n$new_table<!-- AOC PROGRESS END -->" README.md
+          
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add README.md
+          git commit -m "Update progress [skip ci]" || exit 0
+          git push
