@@ -51,6 +51,13 @@ func solve(inputPath string, processFn func([]byte) int64) (int64, error) {
 		totalSum   atomic.Int64
 	)
 
+	// In order to process the lines concurrently,
+	// I assume that there are no splited instructions between lines.
+	// Like this:
+	// 		mul(1
+	//	    ,2)
+	// This can be easily verified in the input files.
+
 	workCh := make(chan []byte, numWorkers*2)
 
 	for i := 0; i < numWorkers; i++ {
